@@ -7,7 +7,11 @@ import { scrapeData } from "./function/scrapeData.js";
 config();
 const app = new Hono();
 const port = process.env.PORT;
-const url = process.env.NSE_URL;
+const urls = [
+  process.env.NSE_URL_ADVANCE,
+  process.env.NSE_URL_DECLINE,
+  process.env.NSE_URL_UNCHANGED,
+];
 
 app.use("*", logger());
 
@@ -18,7 +22,7 @@ app.get("/", (c) => {
 });
 
 app.get("/fetch", async (c) => {
-  await scrapeData(url);
+  await scrapeData(urls);
   return c.json({
     success: true,
     message: "Data successfully scraped and saved to data.txt",
