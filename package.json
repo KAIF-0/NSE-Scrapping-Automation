@@ -13,6 +13,7 @@
   "type": "module",
   "dependencies": {
     "@hono/node-server": "^1.14.0",
+    "axios": "^1.8.4",
     "chromium": "^3.0.3",
     "dotenv": "^16.4.7",
     "hono": "^4.7.5",

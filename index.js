@@ -2,15 +2,25 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { logger } from "hono/logger";
 import { config } from "dotenv";
-import { scrapeData } from "./function/scrapeData.js";
+import { fetchData } from "./function/fetchData.js";
+import { fetchNSEData } from "./function/fetchDatabyApi.js";
 
 config();
 const app = new Hono();
 const port = process.env.PORT;
 const urls = [
-  process.env.NSE_URL_ADVANCE,
-  process.env.NSE_URL_DECLINE,
-  process.env.NSE_URL_UNCHANGED,
+  {
+    url : process.env.NSE_URL_ADVANCE,
+    buttonId : "#Advance-download",
+  },
+  {
+    url : process.env.NSE_URL_DECLINE,
+    buttonId : "#Decline-download",
+  },
+  {
+    url : process.env.NSE_URL_UNCHANGED,
+    buttonId : "#Unchanged-download",
+  },
 ];
 
 app.use("*", logger());
@@ -22,7 +32,8 @@ app.get("/", (c) => {
 });
 
 app.get("/fetch", async (c) => {
-  await scrapeData(urls);
+  await fetchData(urls);
+  // await fetchNSEData();
   return c.json({
     success: true,
     message: "Data successfully scraped and saved to data.txt",
