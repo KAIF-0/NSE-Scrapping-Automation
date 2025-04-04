@@ -64,6 +64,7 @@ export const fetchData = async (urls) => {
 
         //copy the csv file to the data.txt file
         const csvContent = fs.readFileSync("./downloads/Advance.csv", "utf-8");
+        console.log(csvContent);
         fs.appendFileSync("./data.txt", `Data from ${url}:\n${csvContent}\n\n`, "utf-8");
       }
     }
