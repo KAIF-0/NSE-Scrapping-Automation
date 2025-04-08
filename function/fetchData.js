@@ -20,26 +20,25 @@ export const fetchData = async (urls) => {
       ],
       protocolTimeout: 300000,
     });
-
-    const page = await browser.newPage();
-
-    //alllow download in download folder
-    const downloadPath = path.resolve("./downloads");
-    await page._client().send("Page.setDownloadBehavior", {
-      behavior: "allow",
-      downloadPath: downloadPath,
-    });
-
-    //bypassing bot detection
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    );
-
-    await page.setExtraHTTPHeaders({
-      "Accept-Language": "en-US,en;q=0.9",
-    });
-
     for (const singleUrlData of urls) {
+      const page = await browser.newPage();
+
+      //alllow download in download folder
+      const downloadPath = path.resolve("./downloads");
+      await page._client().send("Page.setDownloadBehavior", {
+        behavior: "allow",
+        downloadPath: downloadPath,
+      });
+
+      //bypassing bot detection
+      await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      );
+
+      await page.setExtraHTTPHeaders({
+        "Accept-Language": "en-US,en;q=0.9",
+      });
+
       const { url, buttonId, fileName, sheetName } = singleUrlData;
       await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
 
