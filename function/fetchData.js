@@ -23,13 +23,6 @@ export const fetchData = async (urls) => {
 
     const page = await browser.newPage();
 
-    //alllow download in download folder
-    const downloadPath = path.resolve("./downloads");
-    await page._client().send("Page.setDownloadBehavior", {
-      behavior: "allow",
-      downloadPath: downloadPath,
-    });
-
     //bypassing bot detection
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -42,6 +35,13 @@ export const fetchData = async (urls) => {
     for (const singleUrlData of urls) {
       const { url, buttonId, fileName, sheetName } = singleUrlData;
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
+
+      //alllow download in download folder
+      const downloadPath = path.resolve("./downloads");
+      await page._client().send("Page.setDownloadBehavior", {
+        behavior: "allow",
+        downloadPath: downloadPath,
+      });
 
       await page.waitForSelector(`${buttonId}`, { timeout: 0 });
 
