@@ -27,9 +27,24 @@ export async function uploadCSVToGoogleSheet(
     // console.log(records.length, spreadsheetId);
 
     //clearing old data
-    await sheets.spreadsheets.values.clear({
+    await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
-      range: `${sheetName}!A1`,
+      requestBody: {
+        requests: [
+          {
+            updateCells: {
+              range: {
+                sheetId: await getSheetIdByName(
+                  sheets,
+                  spreadsheetId,
+                  sheetName
+                ),
+              },
+              fields: "*",
+            },
+          },
+        ],
+      },
     });
 
     const CHUNK_SIZE = 1000;
@@ -47,4 +62,11 @@ export async function uploadCSVToGoogleSheet(
   } catch (error) {
     console.error("Error uploading CSV to Google Sheet:", error.message);
   }
+}
+
+async function getSheetIdByName(sheets, spreadsheetId, sheetName) {
+  const res = await sheets.spreadsheets.get({ spreadsheetId });
+  const sheet = res.data.sheets.find((s) => s.properties.title === sheetName);
+  // console.log(sheet?.properties?.sheetId);
+  return sheet?.properties?.sheetId;
 }
