@@ -40,7 +40,7 @@ export const fetchData = async (urls) => {
       });
 
       const { url, buttonId, fileName, sheetName } = singleUrlData;
-      await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
 
       await new Promise((resolve) => {
         setTimeout(() => {
@@ -48,7 +48,7 @@ export const fetchData = async (urls) => {
         }, 2000);
       });
 
-      await page.waitForSelector(`${buttonId}`, { timeout: 0 });
+      await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
 
       //download URL
       const csvUrl = await page.evaluate((btnId) => {
