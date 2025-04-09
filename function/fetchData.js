@@ -41,7 +41,7 @@ export const fetchData = async (urls) => {
       });
 
       const { url, buttonId, fileName, sheetName } = singleUrlData;
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
       await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
 
