@@ -43,7 +43,7 @@ export const fetchData = async (urls) => {
       const { url, buttonId, fileName, sheetName } = singleUrlData;
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
 
-      await page.waitForSelector(`${buttonId}`, { timeout: 0 });
+      await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
 
       //download URL
       const csvUrl = await page.evaluate((btnId) => {
