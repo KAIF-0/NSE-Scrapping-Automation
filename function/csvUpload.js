@@ -22,7 +22,7 @@ export async function uploadCSVToGoogleSheet(
     const sheets = google.sheets({ version: "v4", auth: client });
 
     const csvContent = fs.readFileSync(`./downloads/${fileName}`, "utf-8");
-    const records = parse(csvContent, { skip_empty_lines: true });
+    const records = await parse(csvContent, { skip_empty_lines: true });
 
     // console.log(records.length, spreadsheetId);
 
