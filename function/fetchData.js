@@ -10,17 +10,18 @@ const GOOGLE_SHEET_ID = process.env.NSE_GOOGLE_SHEET_ID;
 
 export const fetchData = async (urls) => {
   try {
-    const browser = await puppeteer.launch({
-      executablePath: chromium.path,
-      headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-blink-features=AutomationControlled",
-      ],
-      protocolTimeout: 300000,
-    });
     for (const singleUrlData of urls) {
+      const browser = await puppeteer.launch({
+        executablePath: chromium.path,
+        headless: "new",
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-blink-features=AutomationControlled",
+        ],
+        protocolTimeout: 300000,
+      });
+
       const page = await browser.newPage();
 
       //alllow download in download folder
@@ -42,13 +43,7 @@ export const fetchData = async (urls) => {
       const { url, buttonId, fileName, sheetName } = singleUrlData;
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
 
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 2000);
-      });
-
-      await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
+      await page.waitForSelector(`${buttonId}`, { timeout: 0 });
 
       //download URL
       const csvUrl = await page.evaluate((btnId) => {
@@ -65,7 +60,7 @@ export const fetchData = async (urls) => {
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 3000);
+          }, 5000);
         });
 
         // const path = `./downloads/Advance.csv`;
@@ -77,9 +72,9 @@ export const fetchData = async (urls) => {
         // console.log(csvContent);
         // fs.appendFileSync("./data.txt", `Data from ${url}:\n${csvContent}\n\n`, "utf-8");
       }
-    }
 
-    await browser.close();
+      await browser.close();
+    }
   } catch (error) {
     throw new Error(`Error fetching CSV data: ${error.message}`);
   }
