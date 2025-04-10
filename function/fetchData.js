@@ -76,6 +76,10 @@ export const fetchData = async (urls) => {
       await browser.close();
     }
   } catch (error) {
+    if (error.message.includes("EAGAIN")) {
+      console.log("Restarting process due to EAGAIN error...");
+      process.exit(1);
+    }
     throw new Error(`Error fetching CSV data: ${error.message}`);
   }
 };
