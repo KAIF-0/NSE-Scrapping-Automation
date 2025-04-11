@@ -1,4 +1,5 @@
-import puppeteer from "puppeteer"; 
+import puppeteer from "puppeteer-core";
+import chromium from "chromium";
 import fs from "fs";
 import path from "path";
 import { uploadCSVToGoogleSheet } from "./csvUpload.js";
@@ -24,7 +25,7 @@ function waitForFileToDownload(filePath, timeout = 30000) {
         clearInterval(interval);
         reject(new Error("Download timeout: File was not saved."));
       }
-    }, 500);
+    }, 500); 
   });
 }
 
@@ -32,19 +33,20 @@ export const fetchData = async (urls) => {
   try {
     for (const singleUrlData of urls) {
       const browser = await puppeteer.launch({
+        executablePath: chromium.path,
         headless: "new",
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
           "--disable-blink-features=AutomationControlled",
         ],
+        protocolTimeout: 300000,
       });
 
       const page = await browser.newPage();
 
       const downloadPath = path.resolve("./downloads");
-      const cdp = await page.target().createCDPSession();
-      await cdp.send("Page.setDownloadBehavior", {
+      await page._client().send("Page.setDownloadBehavior", {
         behavior: "allow",
         downloadPath: downloadPath,
       });
@@ -64,7 +66,6 @@ export const fetchData = async (urls) => {
 
       await page.waitForSelector(buttonId, { timeout: 60000 });
 
-      // Remove old file if exists
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -91,7 +92,7 @@ export const fetchData = async (urls) => {
   } catch (error) {
     if (error.message.includes("EAGAIN")) {
       console.log("Restarting process due to EAGAIN error...");
-      process.exit(1);
+      process.exit(1); 
     }
     throw new Error(`Error fetching CSV data: ${error.message}`);
   }
