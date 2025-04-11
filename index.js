@@ -3,7 +3,6 @@ import { serve } from "@hono/node-server";
 import { logger } from "hono/logger";
 import { config } from "dotenv";
 import { fetchData } from "./function/fetchData.js";
-import { fetchNSEData } from "./function/fetchDatabyApi.js";
 
 config();
 const app = new Hono();
@@ -33,7 +32,6 @@ app.get("/", (c) => {
 
 app.get("/fetch", async (c) => {
   await fetchData(urls);
-  // await fetchNSEData();
   return c.json({
     success: true,
     message: "Data successfully scraped and saved to data.txt",
