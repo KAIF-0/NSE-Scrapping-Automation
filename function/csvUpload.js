@@ -13,7 +13,7 @@ const auth = new google.auth.GoogleAuth({
 });
 
 export async function uploadCSVToGoogleSheet(
-  fileName,
+  records,
   spreadsheetId,
   sheetName
 ) {
@@ -21,10 +21,7 @@ export async function uploadCSVToGoogleSheet(
     const client = await auth.getClient();
     const sheets = google.sheets({ version: "v4", auth: client });
 
-    const csvContent = fs.readFileSync(`./downloads/${fileName}`, "utf-8");
-    const records = await parse(csvContent, { skip_empty_lines: true });
-
-    // console.log(records.length, spreadsheetId);
+    console.log(records.length, sheetName);
 
     //clearing old data
     await sheets.spreadsheets.batchUpdate({

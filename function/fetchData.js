@@ -2,11 +2,35 @@ import puppeteer from "puppeteer-core";
 import chromium from "chromium";
 import fs from "fs";
 import path from "path";
+import { parse } from "csv-parse/sync";
 import { uploadCSVToGoogleSheet } from "./csvUpload.js";
 import { config } from "dotenv";
+import { exit } from "process";
 config();
 
 const GOOGLE_SHEET_ID = process.env.NSE_GOOGLE_SHEET_ID;
+
+const filterCSVData = (rows, fileName) => {
+  // console.log(rows, fileName);
+  if (fileName.split(".")[0].toLowerCase().includes("decline")) {
+    return  rows.filter((row) => row["Series "] === "EQ");
+  }
+
+  if (fileName.split(".")[0].toLowerCase().includes("advance")) {
+    return  rows.filter((row) => {
+      const change = parseFloat(row["%chng "]);
+      const series = row["Series "];
+      if (!change || isNaN(change)) return false;
+
+      return (
+        (series === "EQ" && change > 4) ||
+        (["BE", "SM", "ST"].includes(series) && change > 4)
+      );
+    });
+  }
+
+  return rows;
+};
 
 export const fetchData = async (urls) => {
   try {
@@ -24,14 +48,12 @@ export const fetchData = async (urls) => {
 
       const page = await browser.newPage();
 
-      //alllow download in download folder
       const downloadPath = path.resolve("./downloads");
       await page._client().send("Page.setDownloadBehavior", {
         behavior: "allow",
         downloadPath: downloadPath,
       });
 
-      //bypassing bot detection
       await page.setUserAgent(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       );
@@ -45,7 +67,6 @@ export const fetchData = async (urls) => {
 
       await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
 
-      //download URL
       const csvUrl = await page.evaluate((btnId) => {
         const csvLink = document.querySelector(`${btnId}`);
         return csvLink ? csvLink.href : null;
@@ -53,24 +74,61 @@ export const fetchData = async (urls) => {
 
       if (csvUrl) {
         console.log(`Downloading CSV from: ${csvUrl}`);
-
-        //click on download button
         await page.click(`${buttonId}`);
 
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve();
-          }, 5000);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const filePath = path.join(downloadPath, fileName);
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        const records = parse(fileContent, {
+          columns: true,
+          skip_empty_lines: true,
         });
 
-        // const path = `./downloads/Advance.csv`;
+        const filteredData = await filterCSVData(records, fileName);
 
-        await uploadCSVToGoogleSheet(fileName, GOOGLE_SHEET_ID, sheetName);
+        //writing filtered data back to file
+        if (filteredData.length !== 0) {
+          if (fileName.split(".")[0] === "Advance") {
+            const sheetDetails = [
+              {
+                sheetName: "EQ(ADVANCE)",
+              },
+              {
+                sheetName: "ADVANCE",
+              },
+            ];
+            for (const { sheetName } of sheetDetails) {
+              const data = await filteredData.filter((row) => {
+                const change = parseFloat(row["%chng "]);
+                const series = row["Series "];
+                // console.log("Change:", change, "Series:", series);
+                if (!change || isNaN(change)) return false;
 
-        //copy the csv file to the data.txt file
-        // const csvContent = fs.readFileSync(`./downloads/${fileName}`, "utf-8");
-        // console.log(csvContent);
-        // fs.appendFileSync("./data.txt", `Data from ${url}:\n${csvContent}\n\n`, "utf-8");
+                return sheetName === "EQ(ADVANCE)"
+                  ? series === "EQ" && change > 4
+                  : ["BE", "SM", "ST"].includes(series) && change > 4;
+              });
+              const headers = Object.keys(data[0]);
+              const values = data.map((row) => headers.map((key) => row[key]));
+
+              const finalData = [headers, ...values];
+              await uploadCSVToGoogleSheet(
+                finalData,
+                GOOGLE_SHEET_ID,
+                sheetName
+              );
+            }
+          } else {
+            const headers = Object.keys(filteredData[0]);
+            const values = filteredData.map((row) =>
+              headers.map((key) => row[key])
+            );
+
+            const finalData = [headers, ...values];
+            await uploadCSVToGoogleSheet(finalData, GOOGLE_SHEET_ID, sheetName);
+          }
+        }
       }
 
       await browser.close();
@@ -78,7 +136,7 @@ export const fetchData = async (urls) => {
   } catch (error) {
     if (error.message.includes("EAGAIN")) {
       console.log("Restarting process due to EAGAIN error...");
-      process.exit(1);
+      exit(1);
     }
     throw new Error(`Error fetching CSV data: ${error.message}`);
   }

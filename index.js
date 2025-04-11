@@ -19,13 +19,7 @@ const urls = [
     url: process.env.NSE_URL_DECLINE,
     buttonId: "#Decline-download",
     fileName: "Decline.csv",
-    sheetName: "DECLINE",
-  },
-  {
-    url: process.env.NSE_URL_UNCHANGED,
-    buttonId: "#Unchanged-download",
-    fileName: "Unchanged.csv",
-    sheetName: "UNCHANGED",
+    sheetName: "EQ(DECLINE)",
   },
 ];
 
