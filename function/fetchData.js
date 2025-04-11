@@ -10,17 +10,17 @@ config();
 
 const GOOGLE_SHEET_ID = process.env.NSE_GOOGLE_SHEET_ID;
 
-const filterCSVData = (rows, fileName) => {
+const filterCSVData = async (rows, fileName) => {
   // console.log(rows, fileName);
   if (fileName.split(".")[0].toLowerCase().includes("decline")) {
-    return rows.filter((row) => {
+    return await rows.filter((row) => {
       const change = parseFloat(row["%chng "]);
       return change < -8;
     });
   }
 
   if (fileName.split(".")[0].toLowerCase().includes("advance")) {
-    return rows.filter((row) => {
+    return await rows.filter((row) => {
       const change = parseFloat(row["%chng "]);
       const series = row["Series "];
       if (!change || isNaN(change)) return false;
