@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "NSE-Automation",
       script: "./index.js",
-      instances: 2,
+      instances: 1,
       // cron_restart: "* * * * *",
       env: {
         NODE_ENV: "development",
