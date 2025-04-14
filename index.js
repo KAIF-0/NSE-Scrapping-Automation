@@ -31,7 +31,10 @@ app.get("/", (c) => {
 });
 
 app.get("/fetch", async (c) => {
-  await fetchData(urls);
+  await fetchData(urls).catch((err) => {
+    console.log(err.message);
+    process.exit(1);
+  });
   return c.json({
     success: true,
     message: "Data successfully scraped and saved to data.txt",
