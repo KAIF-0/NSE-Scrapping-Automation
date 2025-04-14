@@ -37,34 +37,33 @@ const filterCSVData = async (rows, fileName) => {
 
 export const fetchData = async (urls) => {
   try {
+    const browser = await puppeteer.launch({
+      executablePath: chromium.path,
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-blink-features=AutomationControlled",
+      ],
+      protocolTimeout: 300000,
+    });
+
+    const page = await browser.newPage();
+
+    const downloadPath = path.resolve("./downloads");
+    await page._client().send("Page.setDownloadBehavior", {
+      behavior: "allow",
+      downloadPath: downloadPath,
+    });
+
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    );
+
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "en-US,en;q=0.9",
+    });
     for (const singleUrlData of urls) {
-      const browser = await puppeteer.launch({
-        executablePath: chromium.path,
-        headless: "new",
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-blink-features=AutomationControlled",
-        ],
-        protocolTimeout: 300000,
-      });
-
-      const page = await browser.newPage();
-
-      const downloadPath = path.resolve("./downloads");
-      await page._client().send("Page.setDownloadBehavior", {
-        behavior: "allow",
-        downloadPath: downloadPath,
-      });
-
-      await page.setUserAgent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      );
-
-      await page.setExtraHTTPHeaders({
-        "Accept-Language": "en-US,en;q=0.9",
-      });
-
       const { url, buttonId, fileName, sheetName } = singleUrlData;
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
@@ -133,9 +132,8 @@ export const fetchData = async (urls) => {
           }
         }
       }
-
-      await browser.close();
     }
+    await browser.close();
   } catch (error) {
     throw new Error(`Error fetching CSV data: ${error.message}`);
   }
