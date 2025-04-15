@@ -23,6 +23,11 @@ export async function uploadCSVToGoogleSheet(
 
     console.log(records.length, sheetName);
 
+    const symbols = records
+      .slice(1)
+      .map((record) => record[0])
+      .join(", ");
+
     //clearing old data
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
@@ -41,6 +46,16 @@ export async function uploadCSVToGoogleSheet(
             },
           },
         ],
+      },
+    });
+
+    //all symbols with seperated with commas
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!I1`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[symbols]],
       },
     });
 
