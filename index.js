@@ -3,24 +3,11 @@ import { serve } from "@hono/node-server";
 import { logger } from "hono/logger";
 import { config } from "dotenv";
 import { fetchData } from "./function/fetchData.js";
+import { urlData } from "./function/getUrlData.js";
 
 config();
 const app = new Hono();
 const port = process.env.PORT;
-const urls = [
-  {
-    url: process.env.NSE_URL_ADVANCE,
-    buttonId: "#Advance-download",
-    fileName: "Advance.csv",
-    sheetName: "ADVANCE",
-  },
-  {
-    url: process.env.NSE_URL_DECLINE,
-    buttonId: "#Decline-download",
-    fileName: "Decline.csv",
-    sheetName: "DECLINE",
-  },
-];
 
 app.use("*", logger());
 
@@ -31,6 +18,9 @@ app.get("/", (c) => {
 });
 
 app.get("/fetch", async (c) => {
+  const day = new Date().toLocaleString("en-US", { weekday: "long" });
+  const urls = await urlData(day);
+  // console.log(urls);
   await fetchData(urls).catch((err) => {
     console.log(err.message);
     process.exit(1);

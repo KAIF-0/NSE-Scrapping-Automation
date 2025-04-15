@@ -14,8 +14,8 @@ const filterCSVData = async (rows, fileName) => {
   // console.log(rows, fileName);
   if (fileName.split(".")[0].toLowerCase().includes("decline")) {
     return await rows.filter((row) => {
-      const change = parseFloat(row["%chng "]);
-      return change < -8;
+      const series = row["Series "];
+      return series.includes("EQ");
     });
   }
 
@@ -92,22 +92,22 @@ export const fetchData = async (urls) => {
         //writing filtered data back to file
         if (filteredData.length !== 0) {
           if (fileName.split(".")[0] === "Advance") {
-            const sheetDetails = [
-              {
-                sheetName: "EQ(ADVANCE)",
-              },
-              {
-                sheetName: "ADVANCE",
-              },
-            ];
-            for (const { sheetName } of sheetDetails) {
+            // const sheetDetails = [
+            //   {
+            //     sheetName: "EQ(ADVANCE)",
+            //   },
+            //   {
+            //     sheetName: "ADVANCE",
+            //   },
+            // ];
+            for (const name of sheetName) {
               const data = await filteredData.filter((row) => {
                 const change = parseFloat(row["%chng "]);
                 const series = row["Series "];
                 // console.log("Change:", change, "Series:", series);
                 if (!change || isNaN(change)) return false;
 
-                return sheetName === "EQ(ADVANCE)"
+                return name.includes("EQ")
                   ? series === "EQ" && change > 4
                   : ["BE", "SM", "ST"].includes(series) && change > 4;
               });
@@ -115,11 +115,7 @@ export const fetchData = async (urls) => {
               const values = data.map((row) => headers.map((key) => row[key]));
 
               const finalData = [headers, ...values];
-              await uploadCSVToGoogleSheet(
-                finalData,
-                GOOGLE_SHEET_ID,
-                sheetName
-              );
+              await uploadCSVToGoogleSheet(finalData, GOOGLE_SHEET_ID, name);
             }
           } else {
             const headers = Object.keys(filteredData[0]);
