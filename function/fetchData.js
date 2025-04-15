@@ -1,5 +1,4 @@
-import puppeteer from "puppeteer-core";
-import chromium from "chromium";
+import puppeteer from "puppeteer"; // Changed from puppeteer-core to puppeteer
 import fs from "fs";
 import path from "path";
 import { parse } from "csv-parse/sync";
@@ -37,8 +36,7 @@ const filterCSVData = async (rows, fileName) => {
 
 export const fetchData = async (urls) => {
   try {
-    const browser = await puppeteer.launch({
-      executablePath: chromium.path,
+    const browser = await puppeteer.launch({ 
       headless: "new",
       args: [
         "--no-sandbox",
@@ -92,19 +90,10 @@ export const fetchData = async (urls) => {
         //writing filtered data back to file
         if (filteredData.length !== 0) {
           if (fileName.split(".")[0] === "Advance") {
-            // const sheetDetails = [
-            //   {
-            //     sheetName: "EQ(ADVANCE)",
-            //   },
-            //   {
-            //     sheetName: "ADVANCE",
-            //   },
-            // ];
             for (const name of sheetName) {
               const data = await filteredData.filter((row) => {
                 const change = parseFloat(row["%chng "]);
                 const series = row["Series "];
-                // console.log("Change:", change, "Series:", series);
                 if (!change || isNaN(change)) return false;
 
                 return name.includes("EQ")
