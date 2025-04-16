@@ -11,7 +11,7 @@ const port = process.env.PORT;
 
 app.use("*", logger());
 
-app.get("/", (c) => {
+app.get("/", (c) => { 
   return c.json({
     message: "Welcome to the API",
   });
