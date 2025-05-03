@@ -36,7 +36,7 @@ const filterCSVData = async (rows, fileName) => {
 
 export const fetchData = async (urls) => {
   try {
-    const browser = await puppeteer.launch({ 
+    const browser = await puppeteer.launch({
       headless: "new",
       args: [
         "--no-sandbox",
@@ -61,8 +61,14 @@ export const fetchData = async (urls) => {
     await page.setExtraHTTPHeaders({
       "Accept-Language": "en-US,en;q=0.9",
     });
+
+    //clearing files to prevent
+    await clearCsvFiles();
+
+    
     for (const singleUrlData of urls) {
       const { url, buttonId, fileName, sheetName } = singleUrlData;
+
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
       await page.waitForSelector(`${buttonId}`, { timeout: 60000 });
@@ -121,5 +127,23 @@ export const fetchData = async (urls) => {
     await browser.close();
   } catch (error) {
     throw new Error(`Error fetching CSV data: ${error.message}`);
+  }
+};
+
+const clearCsvFiles = async () => {
+  const downloadPath = path.join(process.cwd(), "downloads");
+
+  try {
+    const files = fs.readdirSync(downloadPath);
+    // console.log(files);
+
+    for (const file of files) {
+      if (file.endsWith(".csv")) {
+        const filePath = path.join(downloadPath, file);
+        fs.writeFileSync(filePath, "", "utf-8");
+      }
+    }
+  } catch (error) {
+    throw new Error(error.message);
   }
 };

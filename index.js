@@ -11,7 +11,7 @@ const port = process.env.PORT;
 
 app.use("*", logger());
 
-app.get("/", (c) => { 
+app.get("/", (c) => {
   return c.json({
     message: "Welcome to the API",
   });
@@ -20,7 +20,7 @@ app.get("/", (c) => {
 app.get("/fetch", async (c) => {
   const day = new Date().toLocaleString("en-US", { weekday: "long" });
   const urls = await urlData(day);
-  // console.log(urls);
+  console.log(urls);
   if (day === "Saturday" || day === "Sunday") {
     return c.json({
       success: false,
