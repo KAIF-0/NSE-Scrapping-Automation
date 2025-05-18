@@ -13,8 +13,9 @@ const filterCSVData = async (rows, fileName) => {
   // console.log(rows, fileName);
   if (fileName.split(".")[0].toLowerCase().includes("decline")) {
     return await rows.filter((row) => {
+      const change = parseFloat(row["%chng "]);
       const series = row["Series "];
-      return series.includes("EQ");
+      return series.includes("EQ") && change < -8;
     });
   }
 
@@ -65,7 +66,6 @@ export const fetchData = async (urls) => {
     //clearing files to prevent
     await clearCsvFiles();
 
-    
     for (const singleUrlData of urls) {
       const { url, buttonId, fileName, sheetName } = singleUrlData;
 
@@ -92,6 +92,7 @@ export const fetchData = async (urls) => {
         });
 
         const filteredData = await filterCSVData(records, fileName);
+        // console.log(filteredData);
 
         //writing filtered data back to file
         if (filteredData.length !== 0) {
