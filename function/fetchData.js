@@ -5,7 +5,6 @@ import path from "path";
 import { parse } from "csv-parse/sync";
 import { uploadCSVToGoogleSheet } from "./csvUpload.js";
 import { config } from "dotenv";
-import { exit } from "process";
 config();
 
 const GOOGLE_SHEET_ID = process.env.NSE_GOOGLE_SHEET_ID;
