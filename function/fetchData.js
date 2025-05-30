@@ -1,4 +1,5 @@
-import puppeteer from "puppeteer"; // Changed from puppeteer-core to puppeteer
+import puppeteer from "puppeteer-core";
+import chromium from "chromium";
 import fs from "fs";
 import path from "path";
 import { parse } from "csv-parse/sync";
@@ -38,18 +39,13 @@ const filterCSVData = async (rows, fileName) => {
 export const fetchData = async (urls) => {
   try {
     const browser = await puppeteer.launch({
+      executablePath: chromium.path,
       headless: "new",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-blink-features=AutomationControlled",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
       ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       protocolTimeout: 300000,
     });
 
@@ -83,7 +79,6 @@ export const fetchData = async (urls) => {
         const csvLink = document.querySelector(`${btnId}`);
         return csvLink ? csvLink.href : null;
       }, buttonId);
-
       if (csvUrl) {
         console.log(`Downloading CSV from: ${csvUrl}`);
         await page.click(`${buttonId}`);
