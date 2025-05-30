@@ -43,7 +43,13 @@ export const fetchData = async (urls) => {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-blink-features=AutomationControlled",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
       ],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       protocolTimeout: 300000,
     });
 

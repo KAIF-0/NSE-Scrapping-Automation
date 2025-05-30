@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "index.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "buildCommand": "npm install && npx puppeteer browsers install chrome"
+      }
     }
   ],
   "routes": [
@@ -13,6 +16,8 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
+    "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium-browser"
   }
 }
